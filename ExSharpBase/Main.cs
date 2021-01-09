@@ -1,22 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Windows.Forms;
 using ExSharpBase.Modules;
-using ExSharpBase.Game;
-using ExSharpBase.Game.Objects;
-using ExSharpBase.Game.Spells;
-using System.Windows.Forms;
-using System.Drawing;
 
 namespace ExSharpBase
 {
-    class Main
+    internal static class Main
     {
         public static void OnMain()
         {
-            if (Utils.IsKeyPressed(Keys.Space) && Utils.IsGameOnDisplay())
+            if (false && Utils.IsKeyPressed(Keys.Space) && Utils.IsGameOnDisplay())
             {
                 OrbService.Orbwalker.Orbwalk();
 

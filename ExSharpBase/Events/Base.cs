@@ -1,45 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using ExSharpBase.Modules;
 
 namespace ExSharpBase.Events
 {
-    class Base
+    internal class Base
     {
-        private static Base Instance { get; set; } = new Base();
-        private static Timer Ticker;
-
         private Base()
         {
-            Ticker = new Timer(0.1f);
-            Ticker.Elapsed += OnTickElapsed;
-            Ticker.Start();
+            var ticker = new Timer(0.1f);
+            ticker.Elapsed += OnTickElapsed;
+            ticker.Start();
             Instance = this;
         }
 
-        public static ToggleResult Toggle(TickElapsed Value)
+        private static Base Instance { get; set; } = new Base();
+
+        public static ToggleResult Toggle(TickElapsed value)
         {
             if (OnTick != null)
             {
-                foreach (TickElapsed s in OnTick.GetInvocationList())
+                if (OnTick.GetInvocationList().Cast<TickElapsed>().Any(s => s == value))
                 {
-                    if (s == Value)
-                    {
-                        OnTick -= Value;
-                        return ToggleResult.Disabled;
-                    }
+                    OnTick -= value;
+                    return ToggleResult.Disabled;
                 }
             }
-            OnTick += Value;
+
+            OnTick += value;
             return ToggleResult.Enabled;
         }
 
         internal static event TickElapsed OnTick;
 
-        private static void OnTickElapsed(object Sender, TimerElapsedEventArgs e)
+        private static void OnTickElapsed(object sender, TimerElapsedEventArgs e)
         {
             OnTick?.Invoke();
         }

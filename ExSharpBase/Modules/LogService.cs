@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.IO;
-using Microsoft.Win32.SafeHandles;
 using System.Reflection;
+using System.Windows.Forms;
 using ExSharpBase.Enums;
+using Microsoft.Win32.SafeHandles;
 
 namespace ExSharpBase.Modules
 {
@@ -17,19 +13,21 @@ namespace ExSharpBase.Modules
         {
             NativeImport.AllocConsole();
 
-            var outFile = NativeImport.CreateFile("CONOUT$", NativeImport.GENERIC_WRITE | NativeImport.GENERIC_READ, NativeImport.FILE_SHARE_WRITE, 0, NativeImport.OPEN_EXISTING, /*FILE_ATTRIBUTE_NORMAL*/0, 0);
+            var outFile = NativeImport.CreateFile("CONOUT$", NativeImport.GENERIC_WRITE | NativeImport.GENERIC_READ,
+                NativeImport.FILE_SHARE_WRITE, 0, NativeImport.OPEN_EXISTING, /*FILE_ATTRIBUTE_NORMAL*/0, 0);
             var safeHandle = new SafeFileHandle(outFile, true);
 
             NativeImport.SetStdHandle(-11, outFile);
 
-            FileStream fs = new FileStream(safeHandle, FileAccess.Write);
-            StreamWriter writer = new StreamWriter(fs) { AutoFlush = true };
+            var fs = new FileStream(safeHandle, FileAccess.Write);
+            var writer = new StreamWriter(fs) {AutoFlush = true};
 
             Console.SetOut(writer);
 
-            if (NativeImport.GetConsoleMode(outFile, out var cMode)) NativeImport.SetConsoleMode(outFile, cMode | 0x0200);
+            if (NativeImport.GetConsoleMode(outFile, out var cMode))
+                NativeImport.SetConsoleMode(outFile, cMode | 0x0200);
 
-            Console.Title = $"Debug Window - {Assembly.GetExecutingAssembly().GetName().Name}";
+            Console.Title = $@"Debug Window - {Assembly.GetExecutingAssembly().GetName().Name}";
         }
 
         public static void DestroyConsole()
@@ -40,47 +38,54 @@ namespace ExSharpBase.Modules
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return;
             }
         }
 
-        public static string Log(string Format, LogLevel FormatColor = LogLevel.Debug)
+        public static string Log(string format, LogLevel formatColor = LogLevel.Debug)
         {
             if (NativeImport.GetConsoleWindow() != IntPtr.Zero)
             {
-                var ConsoleColour = Console.ForegroundColor;
+                var consoleColour = Console.ForegroundColor;
 
-                switch (FormatColor)
+                switch (formatColor)
                 {
                     case LogLevel.Debug:
-                        ConsoleColour = ConsoleColor.Cyan;
+                        consoleColour = ConsoleColor.Cyan;
                         break;
                     case LogLevel.Error:
-                        ConsoleColour = ConsoleColor.Red;
+                        consoleColour = ConsoleColor.Red;
                         break;
                     case LogLevel.Warn:
-                        ConsoleColour = ConsoleColor.Magenta;
+                        consoleColour = ConsoleColor.Magenta;
+                        break;
+                    case LogLevel.Info:
                         break;
                     default:
                         // Default color
                         break;
                 }
 
-                Console.ForegroundColor = ConsoleColour;
+                Console.ForegroundColor = consoleColour;
 
-                if (String.IsNullOrEmpty(Format))
+                if (string.IsNullOrEmpty(format))
                 {
-                    Console.WriteLine($"[{Assembly.GetExecutingAssembly().GetName().Name}] StringNullOrEmpty Occured at LogService.Log");
-                    return $"[{Assembly.GetExecutingAssembly().GetName().Name}] StringNullOrEmpty Occured at LogService.Log";
+                    Console.WriteLine(
+                        $@"[{Assembly.GetExecutingAssembly().GetName().Name}] StringNullOrEmpty Occured at LogService.Log");
+                    return
+                        $"[{Assembly.GetExecutingAssembly().GetName().Name}] StringNullOrEmpty Occured at LogService.Log";
                 }
 
-                Console.WriteLine($"[{DateTime.Now.ToString("h:mm:ss tt")} - {Assembly.GetExecutingAssembly().GetName().Name}]: {Format}");
-                return $"[{DateTime.Now.ToString("h:mm:ss tt")} - {Assembly.GetExecutingAssembly().GetName().Name}]: {Format}";
+                Console.WriteLine(
+                    $@"[{DateTime.Now:h:mm:ss tt} - {Assembly.GetExecutingAssembly().GetName().Name}]: {format}");
+                return $"[{DateTime.Now:h:mm:ss tt} - {Assembly.GetExecutingAssembly().GetName().Name}]: {format}";
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return "Error: There is no debug console running!";
             }
         }
@@ -93,7 +98,8 @@ namespace ExSharpBase.Modules
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return;
             }
         }
@@ -107,7 +113,8 @@ namespace ExSharpBase.Modules
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return;
             }
         }
@@ -121,7 +128,8 @@ namespace ExSharpBase.Modules
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return;
             }
         }
@@ -134,7 +142,8 @@ namespace ExSharpBase.Modules
             }
             else
             {
-                MessageBox.Show(null, "Error: There is no debug console running!", $"{Assembly.GetExecutingAssembly().GetName().Name}");
+                MessageBox.Show(null, @"Error: There is no debug console running!",
+                    $@"{Assembly.GetExecutingAssembly().GetName().Name}");
                 return IntPtr.Zero;
             }
         }

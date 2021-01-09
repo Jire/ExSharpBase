@@ -1,37 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ExSharpBase.Modules;
+﻿using System.Collections.Generic;
 using ExSharpBase.Game.Objects;
+using ExSharpBase.Modules;
 using SharpDX;
 
 namespace ExSharpBase.Events
 {
-    class Drawing
+    internal static class Drawing
     {
-        public static Dictionary<string, bool> DrawingProperties = new Dictionary<string, bool>()
+        public static readonly Dictionary<string, bool> DrawingProperties = new Dictionary<string, bool>()
         {
-            { "DrawRange", true }
+            {"DrawRange", true}
         };
 
         public static bool IsMenuBeingDrawn = false;
 
         public static void OnDeviceDraw()
         {
-            if (Utils.IsGameOnDisplay())
-            {
-                //When ~ key is pressed...
-                DrawMenu();
+            if (!Utils.IsGameOnDisplay()) return;
+            //When ~ key is pressed...
+            DrawMenu();
 
-                if (DrawingProperties["DrawRange"] == true)
-                {
-                    LocalPlayer.DrawAttackRange(Color.Cyan, 2.5f);
+            if (DrawingProperties["DrawRange"] != true) return;
+            LocalPlayer.DrawAttackRange(Color.Cyan, 2.5f);
 
-                    LocalPlayer.DrawAllSpellRange(Color.OrangeRed);
-                }
-            }
+            LocalPlayer.DrawAllSpellRange(Color.OrangeRed);
         }
 
         private static void DrawMenu()

@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace ExSharpBase.Modules
 {
-    class NativeImport
+    internal static class NativeImport
     {
         public const int SW_HIDE = 0;
         public const int SW_SHOW = 5;
@@ -24,7 +21,8 @@ namespace ExSharpBase.Modules
         internal static extern bool ReleaseCapture();
 
         [DllImport("user32.dll")]
-        public static extern UInt32 SendInput(UInt32 nInputs, [MarshalAs(UnmanagedType.LPArray, SizeConst = 1)] Devices.Keyboard.INPUT[] pInputs, Int32 cbSize);
+        public static extern uint SendInput(uint nInputs, [MarshalAs(UnmanagedType.LPArray, SizeConst = 1)]
+            Devices.Keyboard.INPUT[] pInputs, int cbSize);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
         public static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
@@ -42,18 +40,15 @@ namespace ExSharpBase.Modules
         public static string GetActiveWindowTitle()
         {
             const int nChars = 256;
-            StringBuilder Buff = new StringBuilder(nChars);
-            IntPtr handle = GetForegroundWindow();
+            var buff = new StringBuilder(nChars);
+            var handle = GetForegroundWindow();
 
-            if (GetWindowText(handle, Buff, nChars) > 0)
-            {
-                return Buff.ToString();
-            }
-            return null;
+            return GetWindowText(handle, buff, nChars) > 0 ? buff.ToString() : null;
         }
 
         [DllImport("gdi32.dll")]
-        public static extern bool BitBlt(IntPtr hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc, int nXSrc, int nYSrc, int dwRop);
+        public static extern bool BitBlt(IntPtr hdcDest, int nXDest, int nYDest, int nWidth, int nHeight, IntPtr hdcSrc,
+            int nXSrc, int nYSrc, int dwRop);
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -70,13 +65,13 @@ namespace ExSharpBase.Modules
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr CreateFile(
-        string lpFileName,
-        uint dwDesiredAccess,
-        uint dwShareMode,
-        uint lpSecurityAttributes,
-        uint dwCreationDisposition,
-        uint dwFlagsAndAttributes,
-        uint hTemplateFile);
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            uint lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            uint hTemplateFile);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool GetConsoleMode(IntPtr hConsoleHandle, out uint lpMode);
@@ -95,11 +90,11 @@ namespace ExSharpBase.Modules
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern bool ReadProcessMemory(
-        IntPtr hProcess,
-        IntPtr lpBaseAddress,
-        [Out] byte[] lpBuffer,
-        int dwSize,
-        out IntPtr lpNumberOfBytesRead);
+            IntPtr hProcess,
+            IntPtr lpBaseAddress,
+            [Out] byte[] lpBuffer,
+            int dwSize,
+            out IntPtr lpNumberOfBytesRead);
 
         [DllImport("user32.dll")]
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
@@ -108,13 +103,14 @@ namespace ExSharpBase.Modules
         public static extern bool SetLayeredWindowAttributes(IntPtr hwnd, uint crKey, byte bAlpha, uint dwFlags);
 
         [DllImport("dwmapi.dll")]
-        public static extern void DwmExtendFrameIntoClientArea(IntPtr hWnd, ref Overlay.Drawing.DrawFactory.Margins pMargins);
+        public static extern void DwmExtendFrameIntoClientArea(IntPtr hWnd,
+            ref Overlay.Drawing.DrawFactory.Margins pMargins);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern UInt32 GetWindowLong(IntPtr hWnd, int nIndex);
+        public static extern uint GetWindowLong(IntPtr hWnd, int nIndex);
 
         [DllImportAttribute("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+        public static extern int SendMessage(IntPtr hWnd, int msg, int wParam, int lParam);
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr GetModuleHandle(string moduleName);

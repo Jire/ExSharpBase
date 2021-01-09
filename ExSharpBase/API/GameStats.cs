@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-
-namespace ExSharpBase.API
+﻿namespace ExSharpBase.API
 {
-    class GameStats
+    internal static class GameStats
     {
         internal static string GetGameMode()
         {
-            return Service.GetGameStatsData()["gameMode"].ToString();
+            return Service.GetGameStatsData()["gameMode"]?.ToString();
         }
 
         internal static float GetGameTime()
@@ -21,7 +14,7 @@ namespace ExSharpBase.API
 
         internal static string GetMapName()
         {
-            return Service.GetGameStatsData()["mapName"].ToString();
+            return Service.GetGameStatsData()["mapName"]?.ToString();
         }
 
         internal static int GetMapNumber()
@@ -31,7 +24,7 @@ namespace ExSharpBase.API
 
         internal static string GetMapTerrain()
         {
-            return Service.GetGameStatsData()["mapTerrain"].ToString();
+            return Service.GetGameStatsData()["mapTerrain"]?.ToString();
         }
     }
 }

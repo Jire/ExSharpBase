@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ExSharpBase.API;
+using ExSharpBase.Game.Spells;
 using ExSharpBase.Modules;
-using SharpDX;
+using ExSharpBase.Overlay.Drawing;
 using Newtonsoft.Json.Linq;
+using SharpDX;
 
 namespace ExSharpBase.Game.Objects
 {
@@ -13,46 +13,50 @@ namespace ExSharpBase.Game.Objects
     {
         public static JObject UnitRadiusData;
 
+        private static List<string> RangeSlotList = new List<string> {"Q", "W", "E", "R"};
+        private static List<float> UsedRangeSlotsList = new List<float>();
+
         public static string GetSummonerName()
         {
-            return API.ActivePlayerData.GetSummonerName();
+            return ActivePlayerData.GetSummonerName();
         }
 
         public static int GetLevel()
         {
-            return API.ActivePlayerData.GetLevel();
+            return ActivePlayerData.GetLevel();
         }
 
         public static float GetCurrentGold()
         {
-            return API.ActivePlayerData.GetCurrentGold();
+            return ActivePlayerData.GetCurrentGold();
         }
 
         public static void DrawAttackRange(Color Colour, float Thickness)
         {
             if (IsVisible() && GetCurrentHealth() > 1.0f)
             {
-                Overlay.Drawing.DrawFactory.DrawCircleRange(GetPosition(), GetBoundingRadius() + GetAttackRange(), Colour, Thickness);
+                DrawFactory.DrawCircleRange(GetPosition(), GetBoundingRadius() + GetAttackRange(),
+                    Colour, Thickness);
             }
         }
 
-        public static void DrawSpellRange(Spells.SpellBook.SpellSlot Slot, Color Colour, float Thickness)
+        public static void DrawSpellRange(SpellBook.SpellSlot Slot, Color Colour, float Thickness)
         {
             if (IsVisible() && GetCurrentHealth() > 1.0f)
             {
-                Overlay.Drawing.DrawFactory.DrawCircleRange(GetPosition(), Spells.SpellBook.GetSpellRadius(Slot), Colour, Thickness);
+                DrawFactory.DrawCircleRange(GetPosition(), SpellBook.GetSpellRadius(Slot),
+                    Colour, Thickness);
             }
         }
 
-        private static List<string> RangeSlotList = new List<string>() { "Q", "W", "E", "R" };
-        private static List<float> UsedRangeSlotsList = new List<float>();
         public static void DrawAllSpellRange(Color RGB)
         {
             foreach (string RangeSlot in RangeSlotList)
             {
-                float SpellRange = Spells.SpellBook.SpellDB[RangeSlot].ToObject<JObject>()["Range"][0].ToObject<float>();
+                float SpellRange = SpellBook.SpellDB[RangeSlot].ToObject<JObject>()["Range"][0]
+                    .ToObject<float>();
 
-                if(UsedRangeSlotsList.Count != 0)
+                if (UsedRangeSlotsList.Count != 0)
                 {
                     if (!UsedRangeSlotsList.Contains(SpellRange))
                     {
@@ -65,164 +69,164 @@ namespace ExSharpBase.Game.Objects
                 }
             }
 
-            foreach(float Range in UsedRangeSlotsList)
+            foreach (float Range in UsedRangeSlotsList)
             {
-                Overlay.Drawing.DrawFactory.DrawCircleRange(GetPosition(), Range, RGB, 2.5f);
+                DrawFactory.DrawCircleRange(GetPosition(), Range, RGB, 2.5f);
             }
         }
 
         public static bool IsVisible()
         {
-            return Memory.Read<bool>(Engine.GetLocalPlayer + OffsetManager.Object.Visibility);
+            return Memory.Read<bool>(Engine.GetLocalPlayer + OffsetManager.Object.VISIBILITY);
         }
 
         public static Vector3 GetPosition()
         {
-            float posX = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.Pos);
-            float posY = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.Pos + 0x4);
-            float posZ = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.Pos + 0x8);
+            var posX = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.POS);
+            var posY = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.POS + 0x4);
+            var posZ = Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.POS + 0x8);
 
-            return new Vector3() { X = posX, Y = posY, Z = posZ };
+            return new Vector3 {X = posX, Y = posY, Z = posZ};
         }
 
         public static string GetChampionName()
         {
-            return API.AllPlayerData.AllPlayers.Where(x => x.SummonerName == GetSummonerName()).First().ChampionName;
+            return AllPlayerData.AllPlayers.First(x => x.SummonerName == GetSummonerName()).ChampionName;
         }
 
         public static float GetAttackRange()
         {
-            return Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.AttackRange);
+            return Memory.Read<float>(Engine.GetLocalPlayer + OffsetManager.Object.ATTACK_RANGE);
         }
 
         public static int GetBoundingRadius()
         {
-            return int.Parse(UnitRadiusData[GetChampionName()]["Gameplay radius"].ToString());
+            return int.Parse(UnitRadiusData[GetChampionName()]?["Gameplay radius"]?.ToString() ?? string.Empty);
         }
 
         public static float GetCurrentHealth()
         {
-            return API.ActivePlayerData.ChampionStats.GetCurrentHealth();
+            return ActivePlayerData.ChampionStats.GetCurrentHealth();
         }
 
         public static float GetMaxHealth()
         {
-            return API.ActivePlayerData.ChampionStats.GetMaxHealth();
+            return ActivePlayerData.ChampionStats.GetMaxHealth();
         }
 
         public static float GetHealthRegenRate()
         {
-            return API.ActivePlayerData.ChampionStats.GetHealthRegenRate();
+            return ActivePlayerData.ChampionStats.GetHealthRegenRate();
         }
 
         public string GetResourceType()
         {
-            return API.ActivePlayerData.ChampionStats.GetResourceType();
+            return ActivePlayerData.ChampionStats.GetResourceType();
         }
 
         public static float GetCurrentMana()
         {
-            return API.ActivePlayerData.ChampionStats.GetResourceValue();
+            return ActivePlayerData.ChampionStats.GetResourceValue();
         }
 
         public static float GetCurrentManaMax()
         {
-            return API.ActivePlayerData.ChampionStats.GetResourceMax();
+            return ActivePlayerData.ChampionStats.GetResourceMax();
         }
 
         public static float GetAbilityPower()
         {
-            return API.ActivePlayerData.ChampionStats.GetAbilityPower();
+            return ActivePlayerData.ChampionStats.GetAbilityPower();
         }
 
         public static float GetArmor()
         {
-            return API.ActivePlayerData.ChampionStats.GetArmor();
+            return ActivePlayerData.ChampionStats.GetArmor();
         }
 
         public static float GetArmorPenetrationFlat()
         {
-            return API.ActivePlayerData.ChampionStats.GetArmorPenetrationFlat();
+            return ActivePlayerData.ChampionStats.GetArmorPenetrationFlat();
         }
 
         public static float GetArmorPenetrationPercent()
         {
-            return API.ActivePlayerData.ChampionStats.GetArmorPenetrationPercent();
+            return ActivePlayerData.ChampionStats.GetArmorPenetrationPercent();
         }
 
         public static float GetAttackSpeed()
         {
-            return API.ActivePlayerData.ChampionStats.GetAttackSpeed();
+            return ActivePlayerData.ChampionStats.GetAttackSpeed();
         }
 
         public static float GetBonusArmorPenetrationPercent()
         {
-            return API.ActivePlayerData.ChampionStats.GetBonusArmorPenetrationPercent();
+            return ActivePlayerData.ChampionStats.GetBonusArmorPenetrationPercent();
         }
 
         public static float GetBonusMagicPenetrationPercent()
         {
-            return API.ActivePlayerData.ChampionStats.GetBonusMagicPenetrationPercent();
+            return ActivePlayerData.ChampionStats.GetBonusMagicPenetrationPercent();
         }
 
         public static float GetCooldownReduction()
         {
-            return API.ActivePlayerData.ChampionStats.GetCooldownReduction();
+            return ActivePlayerData.ChampionStats.GetCooldownReduction();
         }
 
         public static float GetCritChance()
         {
-            return API.ActivePlayerData.ChampionStats.GetCritChance();
+            return ActivePlayerData.ChampionStats.GetCritChance();
         }
 
         public static float GetCritDamage()
         {
-            return API.ActivePlayerData.ChampionStats.GetCritDamage();
+            return ActivePlayerData.ChampionStats.GetCritDamage();
         }
 
         public static float GetLifeSteal()
         {
-            return API.ActivePlayerData.ChampionStats.GetLifeSteal();
+            return ActivePlayerData.ChampionStats.GetLifeSteal();
         }
 
         public static float GetMagicLethality()
         {
-            return API.ActivePlayerData.ChampionStats.GetMagicLethality();
+            return ActivePlayerData.ChampionStats.GetMagicLethality();
         }
 
         public static float GetMagicPenetrationFlat()
         {
-            return API.ActivePlayerData.ChampionStats.GetMagicPenetrationFlat();
+            return ActivePlayerData.ChampionStats.GetMagicPenetrationFlat();
         }
 
         public static float GetMagicPenetrationPercent()
         {
-            return API.ActivePlayerData.ChampionStats.GetMagicPenetrationPercent();
+            return ActivePlayerData.ChampionStats.GetMagicPenetrationPercent();
         }
 
         public static float GetMagicResist()
         {
-            return API.ActivePlayerData.ChampionStats.GetMagicResist();
+            return ActivePlayerData.ChampionStats.GetMagicResist();
         }
 
         public static float GetMoveSpeed()
         {
-            return API.ActivePlayerData.ChampionStats.GetMoveSpeed();
+            return ActivePlayerData.ChampionStats.GetMoveSpeed();
         }
 
         public static float GetPhysicalLethality()
         {
-            return API.ActivePlayerData.ChampionStats.GetPhysicalLethality();
+            return ActivePlayerData.ChampionStats.GetPhysicalLethality();
         }
 
         public static float GetSpellVamp()
         {
-            return API.ActivePlayerData.ChampionStats.GetSpellVamp();
+            return ActivePlayerData.ChampionStats.GetSpellVamp();
         }
 
         public static float GetTenacity()
         {
-            return API.ActivePlayerData.ChampionStats.GetTenacity();
+            return ActivePlayerData.ChampionStats.GetTenacity();
         }
     }
 }

@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
 
 namespace ExSharpBase.Modules
 {
-    class Timer
+    internal class Timer
     {
         public static readonly double TickLength = 1000f / Stopwatch.Frequency;
         public static readonly double Frequency = Stopwatch.Frequency;
         public static bool IsHighResolution = Stopwatch.IsHighResolution;
-        public event EventHandler<TimerElapsedEventArgs> Elapsed;
 
         private volatile float _interval;
         private volatile bool _isRunning;
@@ -22,25 +17,30 @@ namespace ExSharpBase.Modules
         public Timer() : this(1f)
         {
         }
+
         public Timer(float interval)
         {
             Interval = interval;
         }
+
         public float Interval
         {
             get => _interval;
             set
             {
-                if (value < 0f || Single.IsNaN(value))
+                if (value < 0f || float.IsNaN(value))
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
+
                 _interval = value;
             }
         }
 
         public bool IsRunning => _isRunning;
         public bool UseHighPriorityThread { get; set; } = false;
+        public event EventHandler<TimerElapsedEventArgs> Elapsed;
+
         public void Start()
         {
             if (_isRunning) return;
@@ -55,8 +55,10 @@ namespace ExSharpBase.Modules
             {
                 _thread.Priority = ThreadPriority.Highest;
             }
+
             _thread.Start();
         }
+
         public void Stop(bool joinThread = true)
         {
             _isRunning = false;
@@ -65,11 +67,12 @@ namespace ExSharpBase.Modules
                 _thread.Join();
             }
         }
+
         private void ExecuteTimer()
         {
-            float nextTrigger = 0f;
+            var nextTrigger = 0f;
 
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
 
             while (_isRunning)
@@ -80,7 +83,7 @@ namespace ExSharpBase.Modules
                 while (true)
                 {
                     elapsed = ElapsedHiRes(stopwatch);
-                    double diff = nextTrigger - elapsed;
+                    var diff = nextTrigger - elapsed;
                     if (diff <= 0f)
                         break;
 
@@ -98,17 +101,15 @@ namespace ExSharpBase.Modules
                 }
 
 
-                double delay = elapsed - nextTrigger;
+                var delay = elapsed - nextTrigger;
                 Elapsed?.Invoke(this, new TimerElapsedEventArgs(delay));
 
                 if (!_isRunning)
                     return;
 
-                if (stopwatch.Elapsed.TotalHours >= 1d)
-                {
-                    stopwatch.Restart();
-                    nextTrigger = 0f;
-                }
+                if (!(stopwatch.Elapsed.TotalHours >= 1d)) continue;
+                stopwatch.Restart();
+                nextTrigger = 0f;
             }
 
             stopwatch.Stop();
@@ -123,11 +124,11 @@ namespace ExSharpBase.Modules
 
     internal class TimerElapsedEventArgs : EventArgs
     {
-        public double Delay { get; }
-
         internal TimerElapsedEventArgs(double delay)
         {
             Delay = delay;
         }
+
+        public double Delay { get; }
     }
 }

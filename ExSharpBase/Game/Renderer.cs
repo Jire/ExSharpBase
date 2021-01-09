@@ -1,24 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ExSharpBase.Modules;
 using SharpDX;
-using ExSharpBase.Modules;
 
 namespace ExSharpBase.Game
 {
-    class Renderer
+    internal static class Renderer
     {
-        private static int ViewMatrix = OffsetManager.Instances.ViewMatrix;
-        private static int ProjectionMatrix = ViewMatrix + 0x40;
+        private const int WIDTH = 0x10;
+        private const int HEIGHT = WIDTH + 0x4;
+        private static readonly int ViewMatrix = OffsetManager.Instances.ViewMatrix;
+        private static readonly int ProjectionMatrix = ViewMatrix + 0x40;
 
-        private const int Width = 0x10;
-        private const int Height = Width + 0x4;
+        private static int Instance { get; } = Memory.Read<int>(OffsetManager.Instances.Renderer);
 
-        public static int Instance { get; } = Memory.Read<int>(OffsetManager.Instances.Renderer);
-
-        public static Matrix GetViewProjectionMatrix()
+        private static Matrix GetViewProjectionMatrix()
         {
             return Matrix.Multiply(GetViewMatrix(), GetProjectionMatrix());
         }
@@ -33,17 +27,17 @@ namespace ExSharpBase.Game
             return Memory.ReadMatrix(ProjectionMatrix);
         }
 
-        public static Vector2 GetScreenResolution()
+        private static Vector2 GetScreenResolution()
         {
-            return new Vector2() { X = Memory.Read<int>(Instance + Width), Y = Memory.Read<int>(Instance + Height) };
+            return new Vector2 {X = Memory.Read<int>(Instance + WIDTH), Y = Memory.Read<int>(Instance + HEIGHT)};
         }
 
         public static Vector2 WorldToScreen(Vector3 pos)
         {
-            Vector2 returnVec = Vector2.Zero;
+            var returnVec = Vector2.Zero;
 
-            Vector2 screen = GetScreenResolution();
-            Matrix matrix = GetViewProjectionMatrix();
+            var screen = GetScreenResolution();
+            var matrix = GetViewProjectionMatrix();
 
             Vector4 clipCoords;
             clipCoords.X = pos.X * matrix[0] + pos.Y * matrix[4] + pos.Z * matrix[8] + matrix[12];

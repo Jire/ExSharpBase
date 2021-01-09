@@ -1,25 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using ExSharpBase.Overlay.Drawing;
 using ExSharpBase.Modules;
+using ExSharpBase.Overlay.Drawing;
 using SharpDX;
-using SharpDX.Windows;
 using SharpDX.Direct3D9;
+using SharpDX.Mathematics.Interop;
+using SharpDX.Windows;
 
 namespace ExSharpBase.Overlay
 {
     public partial class Base : Form
     {
+        private static bool IsInitialised;
+
         public Base()
         {
             InitializeComponent();
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                // turn on WS_EX_TOOLWINDOW style bit
+                cp.ExStyle |= 0x80;
+                return cp;
+            }
         }
 
         private void Base_Load(object sender, EventArgs e)
@@ -32,28 +39,19 @@ namespace ExSharpBase.Overlay
             OnPaint();
         }
 
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                // turn on WS_EX_TOOLWINDOW style bit
-                cp.ExStyle |= 0x80;
-                return cp;
-            }
-        }
-
         internal void OnDraw()
         {
             RenderLoop.Run(this, () =>
             {
-                if(!ExSharpBase.Events.Drawing.IsMenuBeingDrawn) NativeImport.BringWindowToTop(this.Handle);
+                if (!ExSharpBase.Events.Drawing.IsMenuBeingDrawn) NativeImport.BringWindowToTop(Handle);
 
-                DrawFactory.device.Clear(ClearFlags.Target, new SharpDX.Mathematics.Interop.RawColorBGRA(0, 0, 0, 0), 1.0f, 0);
+                DrawFactory.device.Clear(ClearFlags.Target, new RawColorBGRA(0, 0, 0, 0),
+                    1.0f, 0);
                 DrawFactory.device.SetRenderState(RenderState.ZEnable, false);
                 DrawFactory.device.SetRenderState(RenderState.Lighting, false);
                 DrawFactory.device.SetRenderState(RenderState.CullMode, Cull.None);
-                DrawFactory.device.SetTransform(TransformState.Projection, Matrix.OrthoOffCenterLH(0, this.Width, this.Height, 0, 0, 1));
+                DrawFactory.device.SetTransform(TransformState.Projection,
+                    Matrix.OrthoOffCenterLH(0, Width, Height, 0, 0, 1));
 
                 DrawFactory.device.BeginScene();
 
@@ -64,59 +62,57 @@ namespace ExSharpBase.Overlay
             });
         }
 
-
-        private static bool IsInitialised = false;
         internal void OnLoad()
         {
-            NativeImport.SetWindowLong(this.Handle, DrawFactory.GWL_EXSTYLE,
-            (IntPtr)(NativeImport.GetWindowLong(this.Handle, DrawFactory.GWL_EXSTYLE) ^ DrawFactory.WS_EX_LAYERED ^ DrawFactory.WS_EX_TRANSPARENT));
+            NativeImport.SetWindowLong(Handle, DrawFactory.GWL_EXSTYLE,
+                (IntPtr) (NativeImport.GetWindowLong(Handle, DrawFactory.GWL_EXSTYLE) ^ DrawFactory.WS_EX_LAYERED ^
+                          DrawFactory.WS_EX_TRANSPARENT));
 
-            NativeImport.SetLayeredWindowAttributes(this.Handle, 0, 255, DrawFactory.LWA_ALPHA);
+            NativeImport.SetLayeredWindowAttributes(Handle, 0, 255, DrawFactory.LWA_ALPHA);
 
-            if (IsInitialised == false)
+            if (IsInitialised) return;
+            var presentParameters = new PresentParameters
             {
-                PresentParameters presentParameters = new PresentParameters();
-                presentParameters.Windowed = true;
-                presentParameters.SwapEffect = SwapEffect.Discard;
-                presentParameters.BackBufferFormat = Format.A8R8G8B8;
+                Windowed = true, SwapEffect = SwapEffect.Discard, BackBufferFormat = Format.A8R8G8B8
+            };
 
-                DrawFactory.device = new Device(DrawFactory.D3D, 0, DeviceType.Hardware, this.Handle, CreateFlags.HardwareVertexProcessing, presentParameters);
+            DrawFactory.device = new Device(DrawFactory.D3D, 0, DeviceType.Hardware, Handle,
+                CreateFlags.HardwareVertexProcessing, presentParameters);
 
-                DrawFactory.drawLine = new Line(DrawFactory.device);
-                DrawFactory.drawBoxLine = new Line(DrawFactory.device);
-                DrawFactory.drawCircleLine = new Line(DrawFactory.device);
-                DrawFactory.drawFilledBoxLine = new Line(DrawFactory.device);
-                DrawFactory.drawTriLine = new Line(DrawFactory.device);
+            DrawFactory.drawLine = new Line(DrawFactory.device);
+            DrawFactory.drawBoxLine = new Line(DrawFactory.device);
+            DrawFactory.drawCircleLine = new Line(DrawFactory.device);
+            DrawFactory.drawFilledBoxLine = new Line(DrawFactory.device);
+            DrawFactory.drawTriLine = new Line(DrawFactory.device);
 
-                FontDescription fontDescription = new FontDescription()
-                {
-                    FaceName = "Fixedsys Regular",
-                    CharacterSet = FontCharacterSet.Default,
-                    Height = 20,
-                    Weight = FontWeight.Bold,
-                    MipLevels = 0,
-                    OutputPrecision = FontPrecision.Default,
-                    PitchAndFamily = FontPitchAndFamily.Default,
-                    Quality = FontQuality.ClearType
-                };
+            var fontDescription = new FontDescription
+            {
+                FaceName = "Fixedsys Regular",
+                CharacterSet = FontCharacterSet.Default,
+                Height = 20,
+                Weight = FontWeight.Bold,
+                MipLevels = 0,
+                OutputPrecision = FontPrecision.Default,
+                PitchAndFamily = FontPitchAndFamily.Default,
+                Quality = FontQuality.ClearType
+            };
 
-                DrawFactory.font = new SharpDX.Direct3D9.Font(DrawFactory.device, fontDescription);
-                DrawFactory.InitialiseCircleDrawing(DrawFactory.device);
+            DrawFactory.font = new Font(DrawFactory.device, fontDescription);
+            DrawFactory.InitialiseCircleDrawing(DrawFactory.device);
 
-                IsInitialised = true;
+            IsInitialised = true;
 
-                OnDraw();
-            }
+            OnDraw();
         }
 
         public void OnPaint()
         {
             DrawFactory.Marg.Left = 0;
             DrawFactory.Marg.Top = 0;
-            DrawFactory.Marg.Right = this.Width;
-            DrawFactory.Marg.Bottom = this.Height;
+            DrawFactory.Marg.Right = Width;
+            DrawFactory.Marg.Bottom = Height;
 
-            NativeImport.DwmExtendFrameIntoClientArea(this.Handle, ref DrawFactory.Marg);
+            NativeImport.DwmExtendFrameIntoClientArea(Handle, ref DrawFactory.Marg);
         }
     }
 }

@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Management;
-using ExSharpBase.Modules;
 using ExSharpBase.Enums;
+using ExSharpBase.Modules;
 
 namespace ExSharpBase.Events
 {
     class EventsManager
     {
-        private static ManagementEventWatcher ProcessStartEvent = new ManagementEventWatcher("SELECT * FROM Win32_ProcessStartTrace");
-        private static ManagementEventWatcher ProcessStopEvent = new ManagementEventWatcher("SELECT * FROM Win32_ProcessStopTrace");
+        private static ManagementEventWatcher ProcessStartEvent =
+            new ManagementEventWatcher("SELECT * FROM Win32_ProcessStartTrace");
+
+        private static ManagementEventWatcher ProcessStopEvent =
+            new ManagementEventWatcher("SELECT * FROM Win32_ProcessStopTrace");
 
         public static void SubscribeToEvents()
         {
@@ -45,7 +44,7 @@ namespace ExSharpBase.Events
 
         private static void OnProcessException(object sender, UnhandledExceptionEventArgs e)
         {
-            Console.WriteLine($"Error: {(e.ExceptionObject as Exception).Message}");
+            Console.WriteLine($@"Error: {(e.ExceptionObject as Exception).Message}");
 
             Console.ReadKey();
         }

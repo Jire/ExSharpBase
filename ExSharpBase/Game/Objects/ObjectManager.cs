@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
 using ExSharpBase.Modules;
+using SharpDX;
+using Color = System.Drawing.Color;
+using Point = System.Drawing.Point;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace ExSharpBase.Game.Objects
 {
-    class ObjectManager
+    internal static class ObjectManager
     {
         private static Color RGB_PLAYER_HP_BAR_COLOUR = Color.FromArgb(49, 134, 33);
 
@@ -26,41 +27,38 @@ namespace ExSharpBase.Game.Objects
 
         public static Point GetEnemyPosition()
         {
-            var W2S = Renderer.WorldToScreen(LocalPlayer.GetPosition());
-            int Range = (int)(LocalPlayer.GetAttackRange() + LocalPlayer.GetAttackRange());
+            var w2S = Renderer.WorldToScreen(LocalPlayer.GetPosition());
+            var range = (int) (LocalPlayer.GetAttackRange() + LocalPlayer.GetAttackRange());
 
-            Rectangle FOV = new Rectangle((int)W2S.X - Range / 2, (int)W2S.Y - Range / 2, Range + 60, Range - 100);
-            Point[] Searched = PixelSearch.Search(FOV, RGB_ENEMY_LEVEL_COLOR, 1);
+            var fov = new Rectangle((int) w2S.X - range / 2, (int) w2S.Y - range / 2, range + 60, range - 100);
+            var searched = PixelSearch.Search(fov, RGB_ENEMY_LEVEL_COLOR, 1);
 
-            Point result = new Point();
+            var result = new Point();
 
-            if (Searched.Length != 0)
+            if (searched.Length == 0) return result;
+            var orderedY = searched.OrderBy(t => t.Y).ToArray();
+
+            var list = new List<Tuple<Vector2, double>>();
+            var array3 = orderedY;
+
+            foreach (var point in array3)
             {
-                Point[] OrderedY = Searched.OrderBy(t => t.Y).ToArray<Point>();
-
-                List<Tuple<SharpDX.Vector2, double>> list = new List<Tuple<SharpDX.Vector2, double>>();
-                Point[] array3 = OrderedY;
-
-                for (int i = 0; i < array3.Length; i++)
+                var current = new Vector2(point.X, point.Y);
+                if ((from t in list
+                    where (t.Item1 - current).Length() < 25f || Math.Abs(t.Item1.X - current.X) < 25f
+                    select t).Any()) continue;
+                list.Add(new Tuple<Vector2, double>(current, (current - new Vector2(fov.X, fov.Y)).Length()));
+                if (list.Count > 2)
                 {
-                    Point point = array3[i];
-                    SharpDX.Vector2 current = new SharpDX.Vector2((float)point.X, (float)point.Y);
-                    if ((from t in list where (t.Item1 - current).Length() < 25f || Math.Abs(t.Item1.X - current.X) < 25f select t).Count<Tuple<SharpDX.Vector2, double>>() < 1)
-                    {
-                        list.Add(new Tuple<SharpDX.Vector2, double>(current, (double)(current - new SharpDX.Vector2((float)FOV.X, (float)FOV.Y)).Length()));
-                        if (list.Count > 2)
-                        {
-                            break;
-                        }
-                    }
+                    break;
                 }
-
-                Tuple<SharpDX.Vector2, double> tuple = (from t in list orderby t.Item2 select t).ElementAt(0);
-                Point point2 = new Point((int)tuple.Item1.X, (int)tuple.Item1.Y);
-
-                result.X = point2.X + 50;
-                result.Y = point2.Y + 100;
             }
+
+            var (item1, _) = (from t in list orderby t.Item2 select t).ElementAt(0);
+            var point2 = new Point((int) item1.X, (int) item1.Y);
+
+            result.X = point2.X + 50;
+            result.Y = point2.Y + 100;
 
             return result;
         }
